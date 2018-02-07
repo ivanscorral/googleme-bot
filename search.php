@@ -1,59 +1,64 @@
 <?php
 
+include_once 'searchresult.php';
+
 error_reporting(E_ERROR | E_PARSE);
 
 
 class GoogleSearch {
 
   private $search;
-  private $url = 'https://www.google.es/search?q=';
+  private $url = 'https://www.google.com/search?lr=lang_en&cr=countryUS&as_qdr=all&tbs=lr%3Alang_1en%2Cctr%3AcountryUS&q=';
   private $user_agent = 'GoogleMeBot ALPHA';
 
   function __construct($search)
   {
-    $this->search = $search;
-    $this->url = $this->url.$search;
+    $this->search = str_replace(' ', '+', trim($search));
+    $this->url = $this->url.$this->search;
   }
 
-  function doSearch(){
+  function getSearchResults(){
     $ch = curl_init();
     curl_setopt($ch, CURLOPT_URL, $this->url);
     curl_setopt($ch, CURLOPT_USERAGENT, $this->user_agent);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_FOLLOWLOCATION, TRUE);
     $result = curl_exec($ch);
-    echo $result;
     $doc = new DOMDocument();
     $doc->loadHTML($result);
     $node = $doc->getElementById('search');
+    $search_result = null;
     $searches = $node->firstChild->firstChild->childNodes;
 
-    foreach ($searches as $result) {
-      $temp = $result->firstChild->firstChild->attributes->item(0)->value;
-      $result_url = 'http://google.com'. $temp;
-      $search_span =$result->lastChild->childNodes;
-
-      echo $result_url;
-
+    foreach ($searches as $s) {
+      $temp = $s->firstChild->firstChild->attributes->item(0)->value;
+      $title = $s->firstChild->firstChild->nodeValue;
+      $result_url = 'http://google.com/'. $temp;
+      $search_span = $s->lastChild->childNodes;
       foreach($search_span as $search_here)
       {
         if($search_here->nodeName == 'span'){
-          echo '<br>';
           $result_description = $search_here->nodeValue;
+          break;
+        }else{
+          $result_description = null;
         }
 
-      }
-      echo $result_description;
+      }if($result_description != null){
+        # its a proper link.
 
-      echo '<br>--------------------------------<br>';
+        $searchObj = new SearchResult($title, $result_description, $result_url);
+        $search_result[] = $searchObj;
     }
 
+
     }
+    return $search_result;
+  }
 
 
 
 }
 
-$b = new GoogleSearch("lamborghini+urus");
-$b->doSearch();
 
  ?>

@@ -38,8 +38,8 @@ class AccessToken {
 
 
   function refresh(){
-    $client_id = '';
-    $client_secret = '';
+    $client_id = file_get_contents('auth/client_id');
+    $client_secret = file_get_contents('auth/client_secret');
 
     $user_pass = $client_id.':'.$client_secret;
     $base64 = base64_encode($user_pass);

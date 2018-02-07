@@ -9,7 +9,7 @@ class Database{
   private $msqli;
 
   function __construct(){
-    $this->mysqli = new mysqli("", "", "", "");
+    $this->mysqli = new mysqli("localhost", "root", "", "test");
     $this->create_auth_table();
     $this->create_mention_table();
   }

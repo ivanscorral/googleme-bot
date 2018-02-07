@@ -1,6 +1,8 @@
 <?php
 
 include_once 'database.php';
+include_once 'bot.php';
+
 
 $token = getAuthToken();
 
@@ -11,11 +13,14 @@ if($token == null){
   }else{
       printAuthUrl();
   }
+}else{
+  $bot = new Bot($token);
+  $bot->resolveAll();
 }
 
 function getAccessToken($oauth_code){
-  $client_id = '';
-  $client_secret = '';
+  $client_id = trim(file_get_contents('auth/client_id'));
+  $client_secret = trim(file_get_contents('auth/client_secret'));
 
   $user_pass = $client_id.':'.$client_secret;
   $base64 = base64_encode($user_pass);
@@ -42,14 +47,15 @@ function getAccessToken($oauth_code){
 
   $result = json_decode($result);
 
+  var_dump($result);
 
   $database->insertAuth($result->access_token, $result->refresh_token, $result->expires_in);
-  header("Refresh:0; url=auth.php");
+  //header("Refresh:0; url=auth.php");
 }
 
 function printAuthUrl(){
-  $client_id = '';
-  $state = '';
+  $client_id = file_get_contents('auth/client_id');
+  $state = 'SJAIJDSnnba';
   $url = 'https://www.reddit.com/api/v1/authorize?client_id='.$client_id.'&response_type=code&state='.$state.'&redirect_uri=http://localhost/reddit/googleme-bot/auth.php&duration=permanent&scope=privatemessages,identity';
   echo '<a href="'.$url.'">Autorizacion</a>';
 }
