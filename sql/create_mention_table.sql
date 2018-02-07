@@ -1,0 +1,7 @@
+CREATE TABLE IF NOT EXISTS mention (
+  name VARCHAR(20) NOT NULL UNIQUE PRIMARY KEY,
+  author VARCHAR(50),
+  body VARCHAR(1500),
+  created_utc BIGINT,
+  resolved BOOLEAN NOT NULL
+);

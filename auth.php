@@ -2,8 +2,7 @@
 
 include_once 'database.php';
 
-$db = new Database();
-$token = $db->getLastToken();
+$token = getAuthToken();
 
 if($token == null){
   //No tokens in db, create the first one.
@@ -12,12 +11,6 @@ if($token == null){
   }else{
       printAuthUrl();
   }
-}else{
-  //Renew token if expired, continue if not.
-  if($token->hasExpired()){
-    $token = $token->refresh();
-  }
-    echo $token->get_access_token();
 }
 
 function getAccessToken($oauth_code){
@@ -57,8 +50,23 @@ function getAccessToken($oauth_code){
 function printAuthUrl(){
   $client_id = '';
   $state = '';
-  $url = 'https://www.reddit.com/api/v1/authorize?client_id='.$client_id'&response_type=code&state='.$state'&redirect_uri=http://localhost/reddit/googleme-bot/auth.php&duration=permanent&scope=privatemessages';
+  $url = 'https://www.reddit.com/api/v1/authorize?client_id='.$client_id.'&response_type=code&state='.$state.'&redirect_uri=http://localhost/reddit/googleme-bot/auth.php&duration=permanent&scope=privatemessages,identity';
   echo '<a href="'.$url.'">Autorizacion</a>';
+}
+
+function getAuthToken(){
+  $db = new Database();
+  $token = $db->getLastToken();
+
+  //Renew token if expired, continue if not.
+  if($token != NULL){
+    if($token->hasExpired()){
+      $token = $token->refresh();
+    }else{
+    }
+  }
+
+  return $token;
 }
 
 
