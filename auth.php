@@ -54,9 +54,10 @@ function getAccessToken($oauth_code){
 }
 
 function printAuthUrl(){
-  $client_id = file_get_contents('auth/client_id');
+  $client_id = trim(file_get_contents('auth/client_id'));
+  $client_secret = trim(file_get_contents('auth/client_secret'));
   $state = 'SJAIJDSnnba';
-  $url = 'https://www.reddit.com/api/v1/authorize?client_id='.$client_id.'&response_type=code&state='.$state.'&redirect_uri=http://localhost/reddit/googleme-bot/auth.php&duration=permanent&scope=privatemessages,identity';
+  $url = 'https://www.reddit.com/api/v1/authorize?client_id='.$client_id.'&response_type=code&state='.$state.'&redirect_uri=http://localhost/reddit/googleme-bot/auth.php&duration=permanent&scope=privatemessages,identity,submit';
   echo '<a href="'.$url.'">Autorizacion</a>';
 }
 

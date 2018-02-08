@@ -8,7 +8,7 @@ class Bot{
   private $db;
   private $valid = false;
   private $api_url = 'https://oauth.reddit.com/';
-  private $user_agent = 'GoogleMeBot/alpha';
+  private $user_agent = 'php:GoogleMeBot:v0.1 (by /u/ivykoko1)';
 
   private $POST = 'post';
   private $GET = 'get';
@@ -28,20 +28,19 @@ class Bot{
 
   function getMe(){
     $url = $this->api_url.'api/v1/me';
-    return $this->executeQuery($url);
+    return $this->executeQuery($url, $this->GET, NULL);
   }
 
   function getMentions(){
-    $url = $this->api_url.'message/inbox';
+    $url = $this->api_url.'message/unread';
     $messages = $this->executeQuery($url, $this->GET, null);
 
     $result = null;
 
     foreach ($messages->data->children as  $message) {
-      $username = '/u/GoogleMe-Bot';
-      $body = $message->data->body;
+      $username = 'ugoogleme-bot';
+      $body = str_replace('/', '', strtolower($message->data->body));
       if(!(strpos($body, $username) === false)){
-
         $result[] = $message;
       }
     }
@@ -55,9 +54,13 @@ class Bot{
   }
 
   function resolveAll(){
+    if($this->hasMail()){
+      $this->storeMentions();
+    }
     if($this->db!= null){
       $unresolvedQueries = $this->db->getUnresolvedQueries();
       foreach ($unresolvedQueries as $unresolvedQuery) {
+        $unresolvedQuery->setBot($this);
         $unresolvedQuery->resolve();
       }
     }
@@ -98,14 +101,19 @@ class Bot{
     return $this->executeQuery($url, $this->POST, $parameters);
   }
 
-  private function executeQuery($url, $method, $parameters){
+  function comment($parent, $comment){
+    $url = $this->api_url.'api/comment';
+    $parameters = array('api_type' => 'json', 'text' => $comment, 'thing_id' => $parent);
+    return $this->executeQuery($url, $this->POST, $parameters);
+  }
+
+  function executeQuery($url, $method, $parameters){
     $result = false;
     if($this->valid){
       if($method == 'get'){
         curl_setopt($this->ch, CURLOPT_URL, $url);
         $result = curl_exec($this->ch);
       }else if($method == 'post'){
-
         $options = array(
         'http' => array(
             'header'  => $this->authorization ."\r\n"."User-Agent: gmebot/0.1,alpha"."\r\n"."Content-Type: application/x-www-form-urlencoded",
@@ -123,9 +131,5 @@ class Bot{
   }
 
 }
-
-$a = new Bot($token);
-$a->resolveAll();
-
 
 ?>

@@ -14,6 +14,11 @@ class Database{
     $this->create_mention_table();
   }
 
+  function setResolved($name){
+    $query = strtr(file_get_contents('sql/set_resolved.sql'), array('p1' => $name));
+    $this->mysqli->query($query);
+  }
+
   function getUnresolvedQueries(){
     $resultado = $this->mysqli->query(file_get_contents('sql/select_unresolved_queries.sql'));
     $queries = NULL;
@@ -47,7 +52,7 @@ class Database{
   function insertAuth($access_token, $refresh_token, $expiry){
     $query = strtr(file_get_contents('sql/insert_auth.sql'), array('replace1' => $access_token, 'replace2' => $refresh_token, 'replace3' => $expiry));
     if(!$this->mysqli->query($query)){
-       echo "Falló la creación de la tabla: (" . $this->mysqli->errno . ") " . $this->mysqli->error;
+       echo 'Falló: ' . $query;
     }
   }
 

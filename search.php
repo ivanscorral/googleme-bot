@@ -9,12 +9,19 @@ class GoogleSearch {
 
   private $search;
   private $url = 'https://www.google.com/search?lr=lang_en&cr=countryUS&as_qdr=all&tbs=lr%3Alang_1en%2Cctr%3AcountryUS&q=';
-  private $user_agent = 'GoogleMeBot ALPHA';
+  private $user_agent = 'GoogleMeBot ALPHA (reddit.com/user/GoogleMe-Bot)';
+  private $query;
+
 
   function __construct($search)
   {
-    $this->search = str_replace(' ', '+', trim($search));
+    $this->query = trim($search);
+    $this->search = str_replace(' ', '+',   $this->query);
     $this->url = $this->url.$this->search;
+  }
+
+  function getSearch(){
+    return $this->query;
   }
 
   function getSearchResults(){
@@ -44,7 +51,7 @@ class GoogleSearch {
           $result_description = null;
         }
 
-      }if($result_description != null){
+      }if($result_description != null && strpos($result_url, 'url') !== FALSE){
         # its a proper link.
 
         $searchObj = new SearchResult($title, $result_description, $result_url);
